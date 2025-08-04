@@ -1,0 +1,22 @@
+@echo off
+title Nexity60 - Name Change Test
+echo ================================================================
+echo                 TESTING NEXITY60 NAME CHANGE                  
+echo ================================================================
+echo.
+
+cd /d "d:\KL\2nd year\SEM 1\OOPs\Nexity60"
+
+echo Testing if application shows "Nexity60" instead of "60secNews"
+echo Application should now display:
+echo - Window title: "Nexity60 - Smart Summarized News Reader"
+echo - Sidebar header: "Nexity60"
+echo - Welcome message: "Welcome to Nexity60"
+echo.
+
+echo Starting application...
+java --module-path "javafx-sdk-17.0.2\lib" --add-modules javafx.controls,javafx.fxml,javafx.web -cp "lib/*;target/classes;." OriginalNewsApp
+
+echo.
+echo Application closed. Check if the window title and UI showed "Nexity60"
+pause
