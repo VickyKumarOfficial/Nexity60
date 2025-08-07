@@ -401,30 +401,28 @@ public class OriginalNewsApp extends Application {
     }
     
     private String getCSS() {
-        return """
-            .list-view {
-                -fx-background-color: transparent;
-            }
-            .list-cell {
-                -fx-background-color: transparent;
-                -fx-text-fill: #ecf0f1;
-                -fx-padding: 8 12;
-                -fx-font-size: 13px;
-            }
-            .list-cell:selected {
-                -fx-background-color: #3498db;
-                -fx-text-fill: white;
-            }
-            .list-cell:hover {
-                -fx-background-color: #34495e;
-            }
-            .scroll-pane {
-                -fx-background-color: transparent;
-            }
-            .scroll-pane .viewport {
-                -fx-background-color: transparent;
-            }
-            """;
+        return ".list-view { " +
+               "-fx-background-color: transparent; " +
+               "} " +
+               ".list-cell { " +
+               "-fx-background-color: transparent; " +
+               "-fx-text-fill: #ecf0f1; " +
+               "-fx-padding: 8 12; " +
+               "-fx-font-size: 13px; " +
+               "} " +
+               ".list-cell:selected { " +
+               "-fx-background-color: #3498db; " +
+               "-fx-text-fill: white; " +
+               "} " +
+               ".list-cell:hover { " +
+               "-fx-background-color: #34495e; " +
+               "} " +
+               ".scroll-pane { " +
+               "-fx-background-color: transparent; " +
+               "} " +
+               ".scroll-pane .viewport { " +
+               "-fx-background-color: transparent; " +
+               "}";
     }
     
     public static void main(String[] args) {
