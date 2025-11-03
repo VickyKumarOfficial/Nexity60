@@ -52,11 +52,12 @@ public class EnhancedNewsCard extends VBox {
         titleLabel.setMaxWidth(750);
         titleLabel.getStyleClass().add("article-card-title");
         
-        // Create content preview
-        Label contentLabel = new Label(truncateContent(article.getContent(), 300));
+        // Create content preview - expanded to ~10 lines
+        Label contentLabel = new Label(truncateContent(article.getContent(), 1200));
         contentLabel.setFont(Font.font("Segoe UI", 13));
         contentLabel.setWrapText(true);
         contentLabel.setMaxWidth(750);
+        contentLabel.setLineSpacing(4);
         contentLabel.getStyleClass().add("article-card-content");
         
         // Create metadata section

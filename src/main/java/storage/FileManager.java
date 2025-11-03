@@ -88,6 +88,31 @@ public class FileManager {
         return filenames;
     }
     
+    /**
+     * Loads a specific article summary by filename
+     */
+    public NewsArticle loadArticleSummary(String filename) {
+        File file = new File(STORAGE_DIR, filename);
+        if (!file.exists()) {
+            return null;
+        }
+        
+        try (FileReader reader = new FileReader(file)) {
+            return gson.fromJson(reader, NewsArticle.class);
+        } catch (IOException e) {
+            System.err.println("Failed to load article summary: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Deletes a saved article file
+     */
+    public boolean deleteArticle(String filename) {
+        File file = new File(STORAGE_DIR, filename);
+        return file.exists() && file.delete();
+    }
+    
     private String sanitizeFilename(String filename) {
         return filename.replaceAll("[^a-zA-Z0-9.-]", "_")
                        .substring(0, Math.min(50, filename.length()));

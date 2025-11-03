@@ -12,9 +12,12 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import storage.FileManager;
 import model.NewsArticle;
 import core.NewsFetcher;
+import storage.FileManager;
 import ui.components.EnhancedNewsCard;
+import ui.components.SavedArticlesView;
 import ui.theme.Theme;
 import ui.theme.ThemeManager;
 import ui.theme.ColorPalette;
@@ -30,6 +33,7 @@ public class ThemedNewsApp extends Application {
     
     private NewsFetcher newsFetcher;
     private ThemeManager themeManager;
+    private FileManager fileManager;
     private Scene mainScene;
     
     // UI Components
@@ -59,6 +63,7 @@ public class ThemedNewsApp extends Application {
     private void initializeManagers() {
         newsFetcher = new NewsFetcher();
         themeManager = ThemeManager.getInstance();
+        fileManager = new FileManager();
     }
     
     private void setupUI(Stage primaryStage) {
@@ -151,6 +156,12 @@ public class ThemedNewsApp extends Application {
             themeToggle.setText(getThemeButtonText());
         });
         
+        // Saved Articles button
+        Button savedArticlesButton = new Button("📚 Saved Articles");
+        savedArticlesButton.setPrefWidth(150);
+        savedArticlesButton.setStyle("-fx-font-weight: bold; -fx-padding: 8 16;");
+        savedArticlesButton.setOnAction(e -> openSavedArticlesWindow());
+        
         // Spacer
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -158,7 +169,7 @@ public class ThemedNewsApp extends Application {
         controlsBox.getChildren().addAll(
             categoryLabel, categorySelector,
             refreshButton, progressIndicator,
-            spacer, themeToggle
+            spacer, savedArticlesButton, themeToggle
         );
         
         headerBox.getChildren().addAll(titleSection, controlsBox);
@@ -281,8 +292,65 @@ public class ThemedNewsApp extends Application {
     }
     
     private void saveArticle(NewsArticle article) {
-        // TODO: Implement article saving functionality
-        showAlert("Save Article", "Saved: " + article.getTitle(), Alert.AlertType.INFORMATION);
+        try {
+            fileManager.saveArticleSummary(article);
+            
+            // Show success message with option to view saved articles
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Article Saved");
+            alert.setHeaderText("✅ Successfully saved!");
+            alert.setContentText(article.getTitle() + "\n\nClick 'View Saved Articles' to see all your saved articles.");
+            
+            ButtonType viewSavedButton = new ButtonType("View Saved Articles");
+            ButtonType closeButton = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
+            alert.getButtonTypes().setAll(viewSavedButton, closeButton);
+            
+            alert.showAndWait().ifPresent(response -> {
+                if (response == viewSavedButton) {
+                    openSavedArticlesWindow();
+                }
+            });
+            
+        } catch (Exception e) {
+            showAlert("Error", "Failed to save article: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+    
+    /**
+     * Opens a new window showing all saved articles
+     */
+    private void openSavedArticlesWindow() {
+        Stage savedArticlesStage = new Stage();
+        savedArticlesStage.setTitle("📚 Saved Articles - Nexity60");
+        
+        // Create saved articles view
+        SavedArticlesView savedView = new SavedArticlesView();
+        
+        // Create scene with theme support
+        Scene savedScene = new Scene(savedView, 950, 750);
+        
+        // Apply current theme to the saved articles window
+        ColorPalette.Palette palette = themeManager.getPalette();
+        String css = themeManager.getCurrentTheme() == Theme.LIGHT ? 
+            StyleManager.getLightModeCSS() : StyleManager.getDarkModeCSS();
+        String cssDataUrl = "data:text/css;base64," + java.util.Base64.getEncoder()
+            .encodeToString(css.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        savedScene.getStylesheets().add(cssDataUrl);
+        
+        savedArticlesStage.setScene(savedScene);
+        savedArticlesStage.show();
+        
+        // Listen for theme changes to update saved articles window
+        themeManager.addThemeChangeListener(theme -> {
+            Platform.runLater(() -> {
+                savedScene.getStylesheets().clear();
+                String newCss = theme == Theme.LIGHT ? 
+                    StyleManager.getLightModeCSS() : StyleManager.getDarkModeCSS();
+                String newCssDataUrl = "data:text/css;base64," + java.util.Base64.getEncoder()
+                    .encodeToString(newCss.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                savedScene.getStylesheets().add(newCssDataUrl);
+            });
+        });
     }
     
     private void applyTheme() {
