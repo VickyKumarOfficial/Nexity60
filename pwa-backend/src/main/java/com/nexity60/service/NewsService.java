@@ -174,46 +174,102 @@ public class NewsService {
     }
     
     private String extractImageUrl(String itemContent) {
-        // Try to extract image from media:thumbnail or media:content
-        Pattern mediaThumbnailPattern = Pattern.compile(
-            "<media:thumbnail[^>]*url=\"([^\"]+)\"", 
-            Pattern.CASE_INSENSITIVE);
-        Matcher mediaThumbnailMatcher = mediaThumbnailPattern.matcher(itemContent);
-        if (mediaThumbnailMatcher.find()) {
-            return mediaThumbnailMatcher.group(1);
-        }
+        String highestQualityImage = null;
+        int highestWidth = 0;
         
+        // 1. Try media:content (usually highest quality) - extract all and find largest
         Pattern mediaContentPattern = Pattern.compile(
-            "<media:content[^>]*url=\"([^\"]+)\"", 
+            "<media:content[^>]*url=\"([^\"]+)\"[^>]*width=\"(\\d+)\"", 
             Pattern.CASE_INSENSITIVE);
         Matcher mediaContentMatcher = mediaContentPattern.matcher(itemContent);
-        if (mediaContentMatcher.find()) {
-            return mediaContentMatcher.group(1);
+        while (mediaContentMatcher.find()) {
+            String imageUrl = mediaContentMatcher.group(1);
+            int width = Integer.parseInt(mediaContentMatcher.group(2));
+            
+            if (width > highestWidth) {
+                highestWidth = width;
+                highestQualityImage = imageUrl;
+            }
         }
         
-        // Try to extract from enclosure tag
+        // If we found a large image (>= 800px), use it
+        if (highestQualityImage != null && highestWidth >= 800) {
+            return highestQualityImage;
+        }
+        
+        // 2. Try media:content without width attribute (might be high-res)
+        Pattern mediaContentNoWidthPattern = Pattern.compile(
+            "<media:content[^>]*url=\"([^\"]+)\"", 
+            Pattern.CASE_INSENSITIVE);
+        Matcher mediaContentNoWidthMatcher = mediaContentNoWidthPattern.matcher(itemContent);
+        if (mediaContentNoWidthMatcher.find()) {
+            String imageUrl = mediaContentNoWidthMatcher.group(1);
+            // BBC images often have size in URL - prefer larger ones
+            if (imageUrl.contains("976") || imageUrl.contains("1024") || 
+                imageUrl.contains("640") || imageUrl.contains("800")) {
+                return imageUrl;
+            }
+            if (highestQualityImage == null) {
+                highestQualityImage = imageUrl;
+            }
+        }
+        
+        // 3. Try media:thumbnail with width (prefer larger)
+        Pattern mediaThumbnailPattern = Pattern.compile(
+            "<media:thumbnail[^>]*url=\"([^\"]+)\"[^>]*width=\"(\\d+)\"", 
+            Pattern.CASE_INSENSITIVE);
+        Matcher mediaThumbnailMatcher = mediaThumbnailPattern.matcher(itemContent);
+        while (mediaThumbnailMatcher.find()) {
+            String imageUrl = mediaThumbnailMatcher.group(1);
+            int width = Integer.parseInt(mediaThumbnailMatcher.group(2));
+            
+            if (width > highestWidth) {
+                highestWidth = width;
+                highestQualityImage = imageUrl;
+            }
+        }
+        
+        // 4. Try enclosure tag (often high quality)
         Pattern enclosurePattern = Pattern.compile(
             "<enclosure[^>]*url=\"([^\"]+)\"[^>]*type=\"image/[^\"]*\"", 
             Pattern.CASE_INSENSITIVE);
         Matcher enclosureMatcher = enclosurePattern.matcher(itemContent);
-        if (enclosureMatcher.find()) {
-            return enclosureMatcher.group(1);
+        if (enclosureMatcher.find() && highestQualityImage == null) {
+            highestQualityImage = enclosureMatcher.group(1);
         }
         
-        // Try to extract from description's img tag
-        String description = extractRSSField(itemContent, "description");
-        if (description != null) {
-            Pattern imgPattern = Pattern.compile(
-                "<img[^>]*src=\"([^\"]+)\"", 
-                Pattern.CASE_INSENSITIVE);
-            Matcher imgMatcher = imgPattern.matcher(description);
-            if (imgMatcher.find()) {
-                return imgMatcher.group(1);
+        // 5. Try img tag in description as last resort
+        if (highestQualityImage == null) {
+            String description = extractRSSField(itemContent, "description");
+            if (description != null) {
+                Pattern imgPattern = Pattern.compile(
+                    "<img[^>]*src=\"([^\"]+)\"", 
+                    Pattern.CASE_INSENSITIVE);
+                Matcher imgMatcher = imgPattern.matcher(description);
+                if (imgMatcher.find()) {
+                    highestQualityImage = imgMatcher.group(1);
+                }
             }
         }
         
-        // Return a default placeholder image
-        return "https://via.placeholder.com/400x300/4a90e2/ffffff?text=BBC+News";
+        // 6. If we have any image, try to upgrade to higher resolution
+        if (highestQualityImage != null) {
+            // BBC often has size in URL like _240.jpg, _480.jpg, _976.jpg
+            // Try to upgrade to higher resolution
+            highestQualityImage = highestQualityImage
+                .replaceAll("_96\\.", "_976.")
+                .replaceAll("_144\\.", "_976.")
+                .replaceAll("_240\\.", "_976.")
+                .replaceAll("_320\\.", "_976.")
+                .replaceAll("_480\\.", "_976.")
+                .replaceAll("_624\\.", "_976.")
+                .replaceAll("_660\\.", "_976.");
+            
+            return highestQualityImage;
+        }
+        
+        // Return a default placeholder image if nothing found
+        return "https://via.placeholder.com/976x549/4a90e2/ffffff?text=BBC+News";
     }
     
     private String cleanText(String text) {
