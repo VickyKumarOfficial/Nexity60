@@ -1,0 +1,18 @@
+# Render Blueprint for Nexity60 PWA
+# This file is for reference only - deploy services separately through Render Dashboard
+
+# BACKEND: Deploy as Web Service
+# - Type: Web Service
+# - Runtime: Java
+# - Build Command: cd pwa-backend && mvn clean package -DskipTests
+# - Start Command: cd pwa-backend && java -jar target/nexity60-backend-1.0.0.jar
+# - Environment Variables:
+#   JAVA_VERSION=21
+#   MAVEN_VERSION=3.9.11
+
+# FRONTEND: Deploy as Static Site
+# - Type: Static Site  
+# - Build Command: cd pwa-frontend && npm install && npm run build
+# - Publish Directory: pwa-frontend/build
+# - Environment Variables:
+#   REACT_APP_API_URL=https://nexity60-backend.onrender.com/api
