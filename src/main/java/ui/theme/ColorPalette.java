@@ -1,8 +1,6 @@
 // ColorPalette.java - Color palette definitions for light and dark modes
 package ui.theme;
 
-import ui.theme.Theme;
-
 /**
  * Color palette system supporting light and dark themes
  * All colors are defined as constants for easy maintenance

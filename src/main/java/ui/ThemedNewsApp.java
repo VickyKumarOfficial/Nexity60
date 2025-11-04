@@ -12,7 +12,6 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import storage.FileManager;
 import model.NewsArticle;
 import core.NewsFetcher;
 import storage.FileManager;
@@ -330,7 +329,6 @@ public class ThemedNewsApp extends Application {
         Scene savedScene = new Scene(savedView, 950, 750);
         
         // Apply current theme to the saved articles window
-        ColorPalette.Palette palette = themeManager.getPalette();
         String css = themeManager.getCurrentTheme() == Theme.LIGHT ? 
             StyleManager.getLightModeCSS() : StyleManager.getDarkModeCSS();
         String cssDataUrl = "data:text/css;base64," + java.util.Base64.getEncoder()

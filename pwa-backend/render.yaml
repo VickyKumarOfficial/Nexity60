@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: nexity60-backend
+    env: java
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/nexity60-backend-1.0.0.jar
+    envVars:
+      - key: JAVA_VERSION
+        value: 21
+      - key: MAVEN_VERSION
+        value: 3.9.11
+      - key: PORT
+        value: 8080

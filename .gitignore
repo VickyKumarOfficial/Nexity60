@@ -1,0 +1,45 @@
+# Node.js
+pwa-frontend/node_modules/
+pwa-frontend/build/
+pwa-frontend/.env.local
+pwa-frontend/npm-debug.log*
+pwa-frontend/yarn-debug.log*
+pwa-frontend/yarn-error.log*
+
+# Java/Maven
+pwa-backend/target/
+pwa-backend/.mvn/
+pwa-backend/mvnw
+pwa-backend/mvnw.cmd
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# JavaFX compiled classes
+target/
+*.class
+compiled/
+theme_preference.conf
+
+# Downloads
+downloads/
+javafx-sdk-*/
+
+# H2 Database files
+*.db
+*.mv.db
+*.trace.db
+
+# Logs
+*.log
