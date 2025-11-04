@@ -1,18 +1,36 @@
-# Render Blueprint for Nexity60 PWA
-# This file is for reference only - deploy services separately through Render Dashboard
+# Render Blueprint - Nexity60 PWA
+# This file allows you to deploy BOTH services at once!
+#
+# DEPLOYMENT OPTIONS:
+#
+# Option 1: Blueprint Deployment (One-Click) - RECOMMENDED
+#   1. Push this file to GitHub
+#   2. Go to https://dashboard.render.com
+#   3. Click "New" -> "Blueprint"
+#   4. Select your repo: VickyKumarOfficial/Nexity60
+#   5. Render deploys BOTH services automatically!
+#
+# Option 2: Manual Deployment (Separate Services)
+#   Follow the steps in RENDER_DEPLOYMENT_COMPLETE.md
+#
+# Note: Static sites must be deployed separately through dashboard
+# This YAML deploys the backend via Docker
 
-# BACKEND: Deploy as Web Service
-# - Type: Web Service
-# - Runtime: Java
-# - Build Command: cd pwa-backend && mvn clean package -DskipTests
-# - Start Command: cd pwa-backend && java -jar target/nexity60-backend-1.0.0.jar
-# - Environment Variables:
-#   JAVA_VERSION=21
-#   MAVEN_VERSION=3.9.11
+services:
+  # Backend - Spring Boot API (via Docker)
+  - type: web
+    name: nexity60-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./pwa-backend/Dockerfile
+    dockerContext: ./pwa-backend
+    envVars:
+      - key: PORT
+        value: 8080
+    healthCheckPath: /api/news/trending
 
-# FRONTEND: Deploy as Static Site
-# - Type: Static Site  
-# - Build Command: cd pwa-frontend && npm install && npm run build
-# - Publish Directory: pwa-frontend/build
-# - Environment Variables:
-#   REACT_APP_API_URL=https://nexity60-backend.onrender.com/api
+# Frontend must be deployed separately as Static Site
+# Go to Dashboard -> New -> Static Site with these settings:
+#   Build Command: cd pwa-frontend && npm install && npm run build
+#   Publish Directory: pwa-frontend/build
+#   Environment Variable: REACT_APP_API_URL=<backend-url>/api
