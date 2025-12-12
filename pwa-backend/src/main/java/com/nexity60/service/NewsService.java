@@ -177,7 +177,49 @@ public class NewsService {
         String highestQualityImage = null;
         int highestWidth = 0;
         
-        // 1. Try media:content (usually highest quality) - extract all and find largest
+        // 1. Try media:thumbnail first (BBC uses this format: width="240" height="135" url="...")
+        // Pattern handles both orderings: width before url, or url before width
+        Pattern mediaThumbnailPattern1 = Pattern.compile(
+            "<media:thumbnail[^>]*width=\"(\\d+)\"[^>]*url=\"([^\"]+)\"", 
+            Pattern.CASE_INSENSITIVE);
+        Matcher mediaThumbnailMatcher1 = mediaThumbnailPattern1.matcher(itemContent);
+        while (mediaThumbnailMatcher1.find()) {
+            int width = Integer.parseInt(mediaThumbnailMatcher1.group(1));
+            String imageUrl = mediaThumbnailMatcher1.group(2);
+            
+            if (width > highestWidth) {
+                highestWidth = width;
+                highestQualityImage = imageUrl;
+            }
+        }
+        
+        // Also try url before width ordering
+        Pattern mediaThumbnailPattern2 = Pattern.compile(
+            "<media:thumbnail[^>]*url=\"([^\"]+)\"[^>]*width=\"(\\d+)\"", 
+            Pattern.CASE_INSENSITIVE);
+        Matcher mediaThumbnailMatcher2 = mediaThumbnailPattern2.matcher(itemContent);
+        while (mediaThumbnailMatcher2.find()) {
+            String imageUrl = mediaThumbnailMatcher2.group(1);
+            int width = Integer.parseInt(mediaThumbnailMatcher2.group(2));
+            
+            if (width > highestWidth) {
+                highestWidth = width;
+                highestQualityImage = imageUrl;
+            }
+        }
+        
+        // 2. Try media:thumbnail without width (just get the URL)
+        if (highestQualityImage == null) {
+            Pattern mediaThumbnailNoWidth = Pattern.compile(
+                "<media:thumbnail[^>]*url=\"([^\"]+)\"", 
+                Pattern.CASE_INSENSITIVE);
+            Matcher matcher = mediaThumbnailNoWidth.matcher(itemContent);
+            if (matcher.find()) {
+                highestQualityImage = matcher.group(1);
+            }
+        }
+        
+        // 3. Try media:content (usually highest quality) - extract all and find largest
         Pattern mediaContentPattern = Pattern.compile(
             "<media:content[^>]*url=\"([^\"]+)\"[^>]*width=\"(\\d+)\"", 
             Pattern.CASE_INSENSITIVE);
@@ -192,53 +234,29 @@ public class NewsService {
             }
         }
         
-        // If we found a large image (>= 800px), use it
-        if (highestQualityImage != null && highestWidth >= 800) {
-            return highestQualityImage;
-        }
-        
-        // 2. Try media:content without width attribute (might be high-res)
-        Pattern mediaContentNoWidthPattern = Pattern.compile(
-            "<media:content[^>]*url=\"([^\"]+)\"", 
-            Pattern.CASE_INSENSITIVE);
-        Matcher mediaContentNoWidthMatcher = mediaContentNoWidthPattern.matcher(itemContent);
-        if (mediaContentNoWidthMatcher.find()) {
-            String imageUrl = mediaContentNoWidthMatcher.group(1);
-            // BBC images often have size in URL - prefer larger ones
-            if (imageUrl.contains("976") || imageUrl.contains("1024") || 
-                imageUrl.contains("640") || imageUrl.contains("800")) {
-                return imageUrl;
-            }
-            if (highestQualityImage == null) {
-                highestQualityImage = imageUrl;
+        // 4. Try media:content without width attribute
+        if (highestQualityImage == null) {
+            Pattern mediaContentNoWidthPattern = Pattern.compile(
+                "<media:content[^>]*url=\"([^\"]+)\"", 
+                Pattern.CASE_INSENSITIVE);
+            Matcher mediaContentNoWidthMatcher = mediaContentNoWidthPattern.matcher(itemContent);
+            if (mediaContentNoWidthMatcher.find()) {
+                highestQualityImage = mediaContentNoWidthMatcher.group(1);
             }
         }
         
-        // 3. Try media:thumbnail with width (prefer larger)
-        Pattern mediaThumbnailPattern = Pattern.compile(
-            "<media:thumbnail[^>]*url=\"([^\"]+)\"[^>]*width=\"(\\d+)\"", 
-            Pattern.CASE_INSENSITIVE);
-        Matcher mediaThumbnailMatcher = mediaThumbnailPattern.matcher(itemContent);
-        while (mediaThumbnailMatcher.find()) {
-            String imageUrl = mediaThumbnailMatcher.group(1);
-            int width = Integer.parseInt(mediaThumbnailMatcher.group(2));
-            
-            if (width > highestWidth) {
-                highestWidth = width;
-                highestQualityImage = imageUrl;
+        // 5. Try enclosure tag (often high quality)
+        if (highestQualityImage == null) {
+            Pattern enclosurePattern = Pattern.compile(
+                "<enclosure[^>]*url=\"([^\"]+)\"[^>]*type=\"image/[^\"]*\"", 
+                Pattern.CASE_INSENSITIVE);
+            Matcher enclosureMatcher = enclosurePattern.matcher(itemContent);
+            if (enclosureMatcher.find()) {
+                highestQualityImage = enclosureMatcher.group(1);
             }
         }
         
-        // 4. Try enclosure tag (often high quality)
-        Pattern enclosurePattern = Pattern.compile(
-            "<enclosure[^>]*url=\"([^\"]+)\"[^>]*type=\"image/[^\"]*\"", 
-            Pattern.CASE_INSENSITIVE);
-        Matcher enclosureMatcher = enclosurePattern.matcher(itemContent);
-        if (enclosureMatcher.find() && highestQualityImage == null) {
-            highestQualityImage = enclosureMatcher.group(1);
-        }
-        
-        // 5. Try img tag in description as last resort
+        // 6. Try img tag in description as last resort
         if (highestQualityImage == null) {
             String description = extractRSSField(itemContent, "description");
             if (description != null) {
@@ -252,18 +270,16 @@ public class NewsService {
             }
         }
         
-        // 6. If we have any image, try to upgrade to higher resolution
+        // 7. If we have an image, try to upgrade to higher resolution
+        // BBC images use format: /ace/standard/240/... - change 240 to 976 for higher res
         if (highestQualityImage != null) {
-            // BBC often has size in URL like _240.jpg, _480.jpg, _976.jpg
-            // Try to upgrade to higher resolution
+            // Upgrade BBC image URLs to higher resolution
             highestQualityImage = highestQualityImage
-                .replaceAll("_96\\.", "_976.")
-                .replaceAll("_144\\.", "_976.")
-                .replaceAll("_240\\.", "_976.")
-                .replaceAll("_320\\.", "_976.")
-                .replaceAll("_480\\.", "_976.")
-                .replaceAll("_624\\.", "_976.")
-                .replaceAll("_660\\.", "_976.");
+                .replace("/standard/240/", "/standard/976/")
+                .replace("/standard/320/", "/standard/976/")
+                .replace("/standard/480/", "/standard/976/")
+                .replace("/standard/624/", "/standard/976/")
+                .replace("/standard/660/", "/standard/976/");
             
             return highestQualityImage;
         }
