@@ -18,6 +18,8 @@ function NewsPage() {
 
   useEffect(() => {
     fetchNews(category);
+    // Scroll to top when category changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [category]);
 
   const fetchNews = async (cat) => {
@@ -59,6 +61,10 @@ function NewsPage() {
       </div>
 
       {error && <div className="error-message">{error}</div>}
+
+      <h2 className="category-title">
+        {category.charAt(0).toUpperCase() + category.slice(1)} News
+      </h2>
 
       <div className="articles-container">
         {loading && articles.length === 0 ? (

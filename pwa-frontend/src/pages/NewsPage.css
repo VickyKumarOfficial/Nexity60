@@ -79,6 +79,19 @@
   margin-bottom: 20px;
 }
 
+.category-title {
+  text-align: center;
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  margin: 0 auto 25px;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, var(--primary-color), #1976d2);
+  color: white;
+  border-radius: 8px;
+  max-width: 1400px;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
 @media (max-width: 768px) {
   .news-page {
     padding: 10px;
