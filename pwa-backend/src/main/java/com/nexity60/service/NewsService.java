@@ -268,8 +268,8 @@ public class NewsService {
             return highestQualityImage;
         }
         
-        // Return a default placeholder image if nothing found
-        return "https://via.placeholder.com/976x549/4a90e2/ffffff?text=BBC+News";
+        // Return a default placeholder image if nothing found (inline SVG as data URI for reliability)
+        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='976' height='549' viewBox='0 0 976 549'%3E%3Crect fill='%234a90e2' width='976' height='549'/%3E%3Ctext fill='%23fff' font-family='Arial,sans-serif' font-size='48' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EBBC News%3C/text%3E%3C/svg%3E";
     }
     
     private String cleanText(String text) {
@@ -340,6 +340,7 @@ public class NewsService {
             case "health" -> "https://feeds.bbci.co.uk/news/health/rss.xml";
             case "science" -> "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml";
             case "entertainment" -> "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml";
+            case "trending" -> "https://feeds.bbci.co.uk/news/rss.xml";
             default -> "https://feeds.bbci.co.uk/news/rss.xml";
         };
     }

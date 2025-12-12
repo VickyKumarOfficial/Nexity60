@@ -9,14 +9,14 @@
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
-      "type": "image/png",
+      "src": "logo192.svg",
+      "type": "image/svg+xml",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
-      "type": "image/png",
+      "src": "logo512.svg",
+      "type": "image/svg+xml",
       "sizes": "512x512",
       "purpose": "any maskable"
     }
@@ -35,14 +35,14 @@
       "short_name": "News",
       "description": "View latest news",
       "url": "/",
-      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "logo192.svg", "sizes": "192x192" }]
     },
     {
       "name": "Saved Articles",
       "short_name": "Saved",
       "description": "View saved articles",
       "url": "/saved",
-      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "logo192.svg", "sizes": "192x192" }]
     }
   ]
 }

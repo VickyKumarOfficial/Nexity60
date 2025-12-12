@@ -95,11 +95,11 @@ function NewsCard({ article, onUnsave, isSaved: initialIsSaved = false }) {
 
         <div className="card-image-section">
           <img 
-            src={article.imageUrl || 'https://via.placeholder.com/400x300/4a90e2/ffffff?text=BBC+News'} 
+            src={article.imageUrl || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect fill='%234a90e2' width='400' height='300'/%3E%3Ctext fill='%23fff' font-family='Arial,sans-serif' font-size='24' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EBBC News%3C/text%3E%3C/svg%3E"} 
             alt={article.title}
             className="article-image"
             onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/400x300/4a90e2/ffffff?text=BBC+News';
+              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect fill='%234a90e2' width='400' height='300'/%3E%3Ctext fill='%23fff' font-family='Arial,sans-serif' font-size='24' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EBBC News%3C/text%3E%3C/svg%3E";
             }}
           />
         </div>

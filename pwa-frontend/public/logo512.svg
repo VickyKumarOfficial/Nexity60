@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect fill="#2196F3" width="512" height="512" rx="64"/>
+  <text fill="#ffffff" font-family="Arial, sans-serif" font-size="96" font-weight="bold" x="50%" y="40%" text-anchor="middle" dy=".1em">N60</text>
+  <text fill="#ffffff" font-family="Arial, sans-serif" font-size="36" x="50%" y="58%" text-anchor="middle">NEWS</text>
+  <text fill="rgba(255,255,255,0.8)" font-family="Arial, sans-serif" font-size="24" x="50%" y="75%" text-anchor="middle">NEXITY60</text>
+  <circle fill="#ffffff" cx="256" cy="400" r="16"/>
+  <circle fill="rgba(255,255,255,0.6)" cx="210" cy="400" r="10"/>
+  <circle fill="rgba(255,255,255,0.6)" cx="302" cy="400" r="10"/>
+</svg>
